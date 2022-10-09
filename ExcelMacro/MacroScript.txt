@@ -1,0 +1,102 @@
+Sub Main()
+    
+    Application.DisplayAlerts = False
+
+    Dim NewWorkbook As Workbook
+    Set NewWorkbook = Workbooks.Add
+    
+    
+    Dim FileLocation As String
+    FileLocation = "INCLUDE FILE DIRECTORY HERE\Groups.xlsx"
+    Set ImportWorkbook = Workbooks.Open(Filename:=FileLocation) 
+
+    ImportWorkbook.Sheets("Groups").Select
+    Range("A1").Select
+    Selection.Range(Range("A1"), Range("A1").End(xlDown)).Select
+    Range(Selection, Selection.End(xlToRight)).Copy
+    
+	NewWorkbook.Sheets("Sheet1").Range("A1").PasteSpecial Paste:=xlPasteValues
+    ImportWorkbook.Close
+    
+    
+    FileLocation = "INCLUDE FILE DIRECTORY HERE\IPs.xlsx"
+	
+    Set ImportWorkbook = Workbooks.Open(Filename:=FileLocation)
+    
+    ImportWorkbook.Sheets("IP Mapping").Select
+    Range("A1").Select
+    Selection.Range(Range("A1"), Range("A1").End(xlDown)).Select
+    Range(Selection, Selection.End(xlToRight)).Copy
+	
+    NewWorkbook.Sheets.Add
+	NewWorkbook.Sheets("Sheet2").Range("A1").PasteSpecial Paste:=xlPasteValues, Transpose:=True
+	
+    ImportWorkbook.Close
+    
+    '''''''''''''''''''''''''''''''' End of Copying Date '''''''''''''''''''''''''''''''''''''
+    
+    NewWorkbook.Sheets("Sheet1").Activate
+    
+    Set North_West_Cell = Range("A2").Offset(1, 0)
+    Set North_East_Cell = Range("A2").Offset(1, 0).End(xlToRight)
+    Set South_East_Cell = Range("A2").Offset(1, 0).End(xlToRight).End(xlDown)
+    
+        
+    North_East_Cell.Offset(0, 1).Select
+    ActiveCell.Formula = "=CONCAT(" & North_West_Cell.Address(False, False) & ":" & North_East_Cell.Address(False, False) & ")"
+      
+    Selection.AutoFill Destination:=Range(Selection, South_East_Cell.Offset(0, 1))
+	
+    North_East_Cell.Offset(0, 2).Select
+    ActiveCell.Formula = "=XLOOKUP( TRUE," & North_West_Cell.Address(False, False) & ":" & _
+                                             North_East_Cell.Address(False, False) & " <> " & """""" & "," & _ 
+                                             North_West_Cell.Offset(-1, 0).Address(True, False) & " : " & _
+                                             North_East_Cell.Offset(-1, 0).Address(True, False) & ")"
+                                             
+    Selection.AutoFill Destination:=Range(Selection, South_East_Cell.Offset(0, 2))
+	
+    NewWorkbook.Sheets("Sheet2").Activate
+   
+    Range("D2").Select
+    ActiveCell.Formula = "=XLOOKUP(C2," & North_East_Cell.Offset(0,1).Address(True,True,External :=True) & ":" & South_East_Cell.Offset(0,1).Address(True,True) & "," & _
+										  North_East_Cell.Offset(0,2).Address(True,True,External :=True) & ":" & South_East_Cell.Offset(0,2).Address(True,True) & ",0,0)"
+										  
+    
+    
+    Selection.AutoFill Destination:=Range(Selection, Range("C2").End(xlDown).Offset(0, 1))
+	
+	Range("D1").Select
+	ActiveCell.Formula = "Groups"
+    
+    Cells.Select
+    Cells.EntireColumn.AutoFit
+    
+    Range("A1:C1").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    With Selection.Interior
+        .ThemeColor = xlThemeColorDark1
+        .TintAndShade = -0.15
+    End With
+    
+    Range("D1").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    With Selection.Interior
+        .ThemeColor = xlThemeColorAccent4
+        .TintAndShade = 0.60
+    End With
+    
+    Range("A1:D1").Select
+    Selection.Font.Bold = True
+    
+    Range("A1:D1").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Selection.Borders.LineStyle = xlContinuous
+    
+    Sheets("Sheet1").Select
+    ActiveWindow.SelectedSheets.Visible = False
+    
+    Sheets("Sheet2").Select
+    Sheets("Sheet2").Name = "Main"
+
+End Sub
